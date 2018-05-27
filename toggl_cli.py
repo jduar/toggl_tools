@@ -71,11 +71,11 @@ def print_running():
     # Decoding time.
     # Formatting everything.
 
-def start_toggl(description):
+def start_toggl(description, tags):
     
     # Check if a task is running. If it is, print it.
     
-    toggl.start_entry(description)
+    toggl.start_entry(description, tags=tags)
     print('>>> Starting:     ' + description)
     
     
@@ -84,14 +84,8 @@ def stop_toggl():
     if entry == None:
         print("No Toggl entry is running.")
     else:
-        entry_data = entry['data']
-
-        description = entry_data['description']
-        creation_date = entry_data['start']
-        duration = entry_data['duration']
-
-        start_time, run_time = get_time(creation_date, duration)
-
+        description = running_description(entry)
+        start_time, run_time = get_time(entry)
 
         toggl.stop_entry()
         print('>>> Stopped       ' + description)
@@ -112,7 +106,7 @@ def main():
     parser.add_argument('-t', '--tag', nargs='+',
                         help="Set tags for the new Toggl entry.")
     
-    parser.add_argument('-r', '--running', default=True,
+    parser.add_argument('-r', '--running', default=False,
                         help="Check running Toggl entry.",
                         action='store_true')
 
@@ -120,18 +114,20 @@ def main():
 
     if args.running:
         print_running()
-    
+
+    if args.tag and args.new:
+        start_toggl(str(args.new), args.tag)
+        
+    '''
     if args.tag and not args.new:
         print("Incorrect usage.")
         exit()
-    
+
     elif args.new:
         start_toggl(str(args.new))
-        
-    elif args.stop:
+    '''
+    if args.stop:
         stop_toggl()
-
-
 
     
 if __name__ == '__main__':

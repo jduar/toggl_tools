@@ -57,7 +57,7 @@ class Toggl():
             return run_entry
         
     
-    def start_entry(self, description, tags=[]):
+    def start_entry(self, description, tags=None):
         """Starts a new entry."""
 
         """
@@ -71,11 +71,14 @@ class Toggl():
         data = {
             'time_entry': {
             'description': description,
-            'tag': tags,
             'wid': wid,
             'created_with': self.user_agent
             }
         }
+
+        if tags != None and type(tags) is list:
+            data['time_entry']['tags'] = tags
+
         response = requests.post(self.url_start, json=data, headers=self.headers)
         #print(response.text)
 
