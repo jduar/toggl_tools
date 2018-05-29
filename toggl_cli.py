@@ -2,6 +2,7 @@
 
 import argparse
 import time
+import os
 from toggl_tools import Toggl
 
 
@@ -14,7 +15,9 @@ timezone = 1
 
 
 def read_api_key():
-    config = open('config', 'r')
+    """Read the user's API key from the config file."""
+    script_path = os.path.dirname(os.path.realpath(__file__))    
+    config = open(script_path + '/config', 'r')
     api_key = config.readline().rstrip()
     config.close()
     return(api_key)
@@ -132,3 +135,4 @@ def main():
     
 if __name__ == '__main__':
     main()
+    read_api_key()
