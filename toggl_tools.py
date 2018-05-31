@@ -11,6 +11,7 @@ class Toggl():
         self.url_current = 'https://www.toggl.com/api/v8/time_entries/current'
         self.url_start = 'https://www.toggl.com/api/v8/time_entries/start'
         self.url_entries = 'https://www.toggl.com/api/v8/time_entries/'
+        self.url_workspaces = 'https://www.toggl.com/api/v8/workspaces'
 
         self.headers = {
             'Authorization': '',
@@ -35,14 +36,17 @@ class Toggl():
         r = requests.get(url, headers=self.headers)
         return r.json()
     #
-    # --- Entry details.
+    # --- 
     #
 
-    def entry_details(self, entry_id):
-
-        get_url = self.url_entries + str(entry_id)
-        entry = self.request(get_url)
-        return entry
+    def workspaces(self):
+        """Returns a list with the ids of one or more workspaces."""
+        workspaces = self.request(self.url_workspaces)
+        array = []
+        for workspace in workspaces:
+            array.append(workspace['id'])
+        return array
+        
     
     #
     # --- Handling running entries. ---
@@ -57,7 +61,7 @@ class Toggl():
             return run_entry
         
     
-    def start_entry(self, description, tags=None):
+    def start_entry(self, description, tags=None, wid=None):
         """Starts a new entry."""
 
         """
@@ -66,12 +70,9 @@ class Toggl():
         
         """
         
-        wid = 2748043
-        
         data = {
             'time_entry': {
             'description': description,
-            'wid': wid,
             'created_with': self.user_agent
             }
         }
@@ -79,9 +80,12 @@ class Toggl():
         if tags != None and type(tags) is list:
             data['time_entry']['tags'] = tags
 
-        response = requests.post(self.url_start, json=data, headers=self.headers)
-        #print(response.text)
+        # If no wid is given, a default workspace is used.
+        if wid == None:
+            data['time_entry']['wid'] = self.workspaces()[0]
 
+        response = requests.post(self.url_start, json=data, headers=self.headers)
+        
 
     def stop_entry(self):
         """ Stops running entry."""
