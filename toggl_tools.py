@@ -10,7 +10,7 @@ class Toggl():
         # URLs
         self.url_current = 'https://www.toggl.com/api/v8/time_entries/current'
         self.url_start = 'https://www.toggl.com/api/v8/time_entries/start'
-        self.url_entries = 'https://www.toggl.com/api/v8/time_entries/'
+        self.url_entries = 'https://www.toggl.com/api/v8/time_entries'
         self.url_workspaces = 'https://www.toggl.com/api/v8/workspaces'
 
         self.headers = {
@@ -38,7 +38,12 @@ class Toggl():
     #
     # --- 
     #
+    def all_entries(self):
+        """Returns all time entries."""
+        entries = self.request(self.url_entries)
+        return entries
 
+    
     def workspaces(self):
         """Returns a list with the ids of one or more workspaces."""
         workspaces = self.request(self.url_workspaces)
@@ -95,5 +100,5 @@ class Toggl():
             return None
         else:
             entry_id = entry['data']['id']
-            put_url = self.url_entries + str(entry_id) + '/stop'
+            put_url = self.url_entries + '/' + str(entry_id) + '/stop'
             requests.put(put_url, headers=self.headers)

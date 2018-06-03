@@ -74,6 +74,7 @@ def print_running():
     # Decoding time.
     # Formatting everything.
 
+
 def start_toggl(description, tags):
     
     # Check if a task is running. If it is, print it.
@@ -94,6 +95,46 @@ def stop_toggl():
         print('>>> Stopped       ' + description)
         print('>>> Start time:   ' + start_time)
         print('>>> Run time:     ' +     run_time)
+
+
+def is_entry_in_list(entry, a_list):
+    """Checks if an entry with the same description exists in given list."""
+    for item in a_list:
+        if entry['description'] == item['description']:
+            return True
+    return False
+
+
+def resume():
+    """Resumes a recent entry with all its properties."""
+    entries = toggl.all_entries()
+    entry_list = []
+    
+    for entry in entries:
+        if is_entry_in_list(entry, entry_list) == False:
+            entry_list.append(entry)
+
+    print(">>> You can resume the following entries:")
+    n = 1
+    for entry in entry_list:
+        print('> {} - {} [{}]'.format(str(n),
+                                      entry['description'],
+                                      ",".join([str(tag) for tag in entry['tags']])))
+        n += 1
+    choice = int(input(">>> Type an entry number: "))
+
+    if choice >= 1 and choice <= len(entry_list):
+        res_entry = entry_list[choice-1]
+        start_toggl(res_entry['description'], res_entry['tags'])
+    else:
+        print("You typed an unavailable number.")
+
+    """
+    >>> You can resume the following entries:
+    > 1 - test [tag]
+    > 2 - another [different_tag]
+    >>> Type an entry number: 
+    """
     
 
 def main():
@@ -105,6 +146,8 @@ def main():
                        help="Create a new Toggl entry.")
     group.add_argument('-s', '--stop', action='store_true',
                        help="Stop the running Toggl entry.")
+    group.add_argument('--resume', action='store_true',
+                       help="Resume a previous Toggl entry.")
 
     parser.add_argument('-t', '--tag', nargs='+',
                         help="Set tags for the new Toggl entry.")
@@ -120,6 +163,9 @@ def main():
 
     if args.tag and args.new:
         start_toggl(str(args.new), args.tag)
+
+    if args.resume:
+        resume()
         
     '''
     if args.tag and not args.new:
