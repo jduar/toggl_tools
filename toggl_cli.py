@@ -5,6 +5,13 @@ import time
 import os
 from toggl_tools import Toggl
 
+try:
+    import toggl_polybar as Polybar
+except ImportError:
+    polybar = False
+else:
+    polybar = True
+
 
 toggl = Toggl()
 
@@ -80,6 +87,8 @@ def start_toggl(description, tags):
     # Check if a task is running. If it is, print it.
     
     toggl.start_entry(description, tags=tags)
+    #Polybar.tentativa()
+    
     print('>>> Starting:     ' + description)
     
     
@@ -107,7 +116,20 @@ def is_entry_in_list(entry, a_list):
 
 def resume():
     """Resumes a recent entry with all its properties."""
-    entries = toggl.all_entries()
+    # We now retrieve all entries in the previous month.
+    # Getting the current date and the date from a month before.
+    time_year = time.localtime()[0] 
+    time_month = time.localtime()[1]
+    time_day = time.localtime()[2]
+    if time_month == 1:
+        prev_time_month = 12
+        prev_time_year = time_year - 1
+    else:
+        prev_time_month = time_month - 1
+        prev_time_year = time_year
+    cur_date = str(time_year) + '-' + str(time_month) + '-' + str(time_day)
+    prev_date = str(prev_time_year) + '-' + str(prev_time_month) + '-' + str(time_day)
+    entries = toggl.entries_between(prev_date, cur_date)
     entry_list = []
     
     for entry in entries:

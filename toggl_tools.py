@@ -43,6 +43,28 @@ class Toggl():
         entries = self.request(self.url_entries)
         return entries
 
+
+    def entries_between(self, start_date, end_date, start_time='00:00:00', end_time='23:59:59', timezone='00:00'):
+        """Returns all entries between two dates."""
+        start_time_str = 'T{}%3A{}%3A{}'.format(start_time[0:2],
+                                               start_time[3:5],
+                                               start_time[6:])
+        end_time_str = 'T{}%3A{}%3A{}'.format(end_time[0:2],
+                                             end_time[3:5],
+                                             end_time[6:])
+        timezone_str = '%2B{}%3A{}'.format(timezone[0:2], timezone[3:])
+        
+        url = self.url_entries + '?start_date={}{}{}&end_date={}{}{}'.format(start_date, start_time_str, timezone_str, end_date, end_time_str, timezone_str)
+        
+        entries = self.request(url)
+        return entries
+        
+        """
+        2013-03-10, 2013-03-12, 15:42:46, 15:42:46, 02:00
+        
+        https://www.toggl.com/api/v8/time_entries?start_date=2013-03-10T15%3A42%3A46%2B02%3A00&end_date=2013-03-12T15%3A42%3A46%2B02%3A00
+        """
+    
     
     def workspaces(self):
         """Returns a list with the ids of one or more workspaces."""
