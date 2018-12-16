@@ -5,16 +5,16 @@ import time
 import os
 from toggl_tools import Toggl
 
+"""
 try:
     import toggl_polybar as Polybar
 except ImportError:
     polybar = False
 else:
     polybar = True
-
+"""
 
 toggl = Toggl()
-
 
 ### Timezone (??)
 # UTC is 0
@@ -60,21 +60,31 @@ def get_time(entry):
 
 
 def running_description(entry):
-        entry_data = entry['data']
-        description = entry_data['description']
-        return description
+    entry_data = entry['data']
+    description = entry_data['description']
+    return description
+
+
+def running_tags(entry):
+    entry_data = entry['data']
+    tags = entry_data['tags']
+    if tags == []:
+        return None
+    else:
+        return tags
 
 
 def print_running():
-    
     entry = toggl.running_entry()
     if entry == None:
         print("No Toggl entry is running.")
     else:
         description = running_description(entry)
+        tags = running_tags(entry)
         start_time, run_time = get_time(entry)
-
         print('>>> Running:      ' + description)
+        if tags is not None:
+            print('>>> Tags:         ' + ",".join(tags))
         print('>>> Start time:   ' + start_time)
         print('>>> Running for:  ' + run_time)
         
@@ -87,7 +97,6 @@ def start_toggl(description, tags):
     # Check if a task is running. If it is, print it.
     
     toggl.start_entry(description, tags=tags)
-    #Polybar.tentativa()
     
     print('>>> Starting:     ' + description)
     
@@ -139,9 +148,12 @@ def resume():
     print(">>> You can resume the following entries:")
     n = 1
     for entry in entry_list:
+        tags = []
+        if 'tags' in entry:
+            [tags.append(i) for i in entry['tags']]
         print('> {} - {} [{}]'.format(str(n),
                                       entry['description'],
-                                      ",".join([str(tag) for tag in entry['tags']])))
+                                      ",".join(tags)))
         n += 1
     choice = int(input(">>> Type an entry number: "))
 
@@ -160,7 +172,6 @@ def resume():
     
 
 def main():
-    
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
 
@@ -183,10 +194,10 @@ def main():
     if args.running:
         print_running()
 
-    if args.tag and args.new:
+    elif args.tag and args.new:
         start_toggl(str(args.new), args.tag)
 
-    if args.resume:
+    elif args.resume:
         resume()
         
     '''
