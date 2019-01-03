@@ -136,8 +136,9 @@ def resume():
     else:
         prev_time_month = time_month - 1
         prev_time_year = time_year
-    cur_date = str(time_year) + '-' + str(time_month) + '-' + str(time_day)
-    prev_date = str(prev_time_year) + '-' + str(prev_time_month) + '-' + str(time_day)
+    cur_date = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day)
+    prev_date = str(prev_time_year) + '-' + ('%02d' % prev_time_month) + '-' + ('%02d' % time_day)
+
     entries = toggl.entries_between(prev_date, cur_date)
     entry_list = []
     
