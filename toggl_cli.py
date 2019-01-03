@@ -171,7 +171,7 @@ def resume():
     """
     
 
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
 
@@ -200,6 +200,12 @@ def main():
     elif args.resume:
         resume()
         
+    elif args.stop:
+        stop_toggl()
+
+    # Default behaviour is to show running entries.
+    else:
+        print_running()
     '''
     if args.tag and not args.new:
         print("Incorrect usage.")
@@ -208,10 +214,5 @@ def main():
     elif args.new:
         start_toggl(str(args.new))
     '''
-    if args.stop:
-        stop_toggl()
 
-    
-if __name__ == '__main__':
-    main()
     read_api_key()
