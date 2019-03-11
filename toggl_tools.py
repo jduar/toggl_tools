@@ -6,12 +6,11 @@ from base64 import b64encode
 
 def check_internet():
     url = "https://www.toggl.com/"
-    timeout = 5
+    timeout = 25
     try:
         rq_test = requests.get(url, timeout=timeout)
         return True
     except requests.ConnectionError:
-        print("toggl.com unreachable")
         return False
 
 
@@ -33,9 +32,6 @@ class Toggl():
 
         self.user_agent = 'toggl_tools'
 
-        # Check for toggl.com availability
-        if not check_internet():
-            quit()
     
     # Setting the user's API key
     def set_api_key(self, api_key):
@@ -47,6 +43,10 @@ class Toggl():
 
 
     def request(self, url):
+        # Check for toggl.com availability
+        if not check_internet():
+            print("toggl.com unreachable")
+            quit()
         """Making a get request."""
         r = requests.get(url, headers=self.headers)
         return r.json()
