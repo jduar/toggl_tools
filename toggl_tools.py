@@ -88,7 +88,7 @@ class Toggl():
             return run_entry
         
     
-    def start_entry(self, description, tags=None, wid=None):
+    def start_entry(self, description, start_time=None, duration=None, tags=None, wid=None):
         """Starts a new entry."""
 
         """
@@ -103,6 +103,12 @@ class Toggl():
             'created_with': self.user_agent
             }
         }
+
+        if start_time != None:
+            data['time_entry']['start'] = start_time
+
+        if duration != None:
+            data['time_entry']['duration'] = duration
 
         if tags != None and type(tags) is list:
             data['time_entry']['tags'] = tags

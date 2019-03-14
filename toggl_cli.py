@@ -136,6 +136,7 @@ def resume():
     else:
         prev_time_month = time_month - 1
         prev_time_year = time_year
+
     cur_date = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day)
     prev_date = str(prev_time_year) + '-' + ('%02d' % prev_time_month) + '-' + ('%02d' % time_day)
 
@@ -170,7 +171,24 @@ def resume():
     > 2 - another [different_tag]
     >>> Type an entry number: 
     """
+
+
+def make_entry(description, tags, duration):
+    """Create a finished entry with a set duration."""
+    time_year = time.localtime(time.time() - duration)[0] 
+    time_month = time.localtime(time.time() - duration)[1]
+    time_day = time.localtime(time.time() - duration)[2]
+    time_hour = time.localtime(time.time() - duration)[3]
+    time_min = time.localtime(time.time() - duration)[4]
+    time_sec = time.localtime(time.time() - duration)[5]
+        
+    start_time = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day + 'T' + str(time_hour) + ':' + str(time_min) + ':' + str(time_sec))
+
+    print(start_time)
+    toggl.start_entry(description, start_time, duration, tags)
     
+    print('>>> Created: ' + description)    
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -180,13 +198,17 @@ if __name__ == '__main__':
                        help="Create a new Toggl entry.")
     group.add_argument('-s', '--stop', action='store_true',
                        help="Stop the running Toggl entry.")
-    group.add_argument('--resume', action='store_true',
+    group.add_argument('-r', '--resume', action='store_true',
                        help="Resume a previous Toggl entry.")
+    group.add_argument('-a', '--add', type=str,
+                        help="Add a Toggl entry.")
 
+    parser.add_argument('-d', '--duration',
+                        help="Set duration for a done entry.")
     parser.add_argument('-t', '--tag', nargs='+',
                         help="Set tags for the new Toggl entry.")
     
-    parser.add_argument('-r', '--running', default=False,
+    parser.add_argument('--running', default=False,
                         help="Check running Toggl entry.",
                         action='store_true')
 
@@ -197,6 +219,9 @@ if __name__ == '__main__':
 
     elif args.tag and args.new:
         start_toggl(str(args.new), args.tag)
+
+    elif args.tag and args.duration and args.add:
+        make_entry(str(args.add), args.tag, int(args.duration))
 
     elif args.resume:
         resume()
