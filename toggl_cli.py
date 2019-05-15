@@ -133,9 +133,12 @@ def resume():
     entries = toggl.entries_between(prev_date, cur_date)
     entry_list = []
 
+
     for entry in entries:
-        if is_entry_in_list(entry, entry_list) is not False:
+        if is_entry_in_list(entry, entry_list) is False:
             entry_list.append(entry)
+
+    # TODO: Print 10 entries in order of last used.
 
     print(">>> You can resume the following entries:")
     n = 1
