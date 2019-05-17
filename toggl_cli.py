@@ -9,7 +9,7 @@ import sys
 
 toggl = Toggl()
 
-# Timezone (??)
+# TODO: Easier timezone behaviour.
 # UTC is 0
 timezone = 1
 
@@ -27,6 +27,7 @@ def read_api_key():
 toggl.set_api_key(read_api_key())
 
 
+### Auxiliary Functions ###
 def get_time(entry):
     """ Turns the date into a readable format."""
     entry_data = entry['data']
@@ -47,9 +48,18 @@ def get_time(entry):
     minutes = int((run_time // 60) - hours * 60)
     seconds = int(run_time % 60)
 
+    # TODO: Reformat - line string too long.
     run_time_str = ("%02d" % hours) + ':' + ("%02d" % minutes) + ':' + ("%02d" % seconds)
 
     return start_time, run_time_str
+
+
+def is_entry_in_list(entry, a_list):
+    """Checks if an entry with the same description exists in given list."""
+    for item in a_list:
+        if entry['description'] == item['description']:
+            return True
+    return False
 
 
 def running_description(entry):
@@ -67,8 +77,8 @@ def running_tags(entry):
         return tags
 
 
-def print_running():
-    entry = toggl.running_entry()
+### ###
+def print_running(entry):
     if entry is None:
         print("No Toggl entry is running.")
     else:
@@ -85,8 +95,16 @@ def print_running():
     # Formatting everything.
 
 
+def check_running():
+    entry = toggl.running_entry()
+    if entry is None:
+        return False
+    else:
+        return True
+
+
 def start_toggl(description, tags):
-    # Check if a task is running. If it is, print it.
+    # TODO: Check if a task is running. If it is, print it.
     toggl.start_entry(description, tags=tags)
     print('>>> Starting:     ' + description)
 
@@ -105,16 +123,13 @@ def stop_toggl():
         print('>>> Run time:     ' + run_time)
 
 
-def is_entry_in_list(entry, a_list):
-    """Checks if an entry with the same description exists in given list."""
-    for item in a_list:
-        if entry['description'] == item['description']:
-            return True
-    return False
-
-
 def resume():
     """Resumes a recent entry with all its properties."""
+    entry = toggl.running_entry()
+    if entry is not None:
+        print("An entry is already running:")
+        print_running(entry)
+        return False
     # We now retrieve all entries in the previous month.
     # Getting the current date and the date from a month before.
     time_year = time.localtime()[0]
@@ -127,12 +142,12 @@ def resume():
         prev_time_month = time_month - 1
         prev_time_year = time_year
 
+    # TODO: Reformat this barbarity.
     cur_date = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day)
     prev_date = str(prev_time_year) + '-' + ('%02d' % prev_time_month) + '-' + ('%02d' % time_day)
 
     entries = toggl.entries_between(prev_date, cur_date)
     entry_list = []
-
 
     for entry in entries:
         if is_entry_in_list(entry, entry_list) is False:
@@ -179,14 +194,15 @@ def add_entry(description, tags, duration):
     time_min = time.localtime(time.time() - duration)[4]
     time_sec = time.localtime(time.time() - duration)[5]
 
-    start_time = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day + 'T' + str(time_hour) + ':' + str(time_min) + ':' + str(time_sec))
+    # TODO: Reformat this barbarity.
+    start_time = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day) + 'T' + ('%02d' % time_hour) + ':' + ('%02d' % time_min) + ':' + str(time_sec) + '+' + ('%02d:00' % timezone)
 
-    print(start_time)
-    # toggl.start_entry(description, start_time, duration, tags)
+    toggl.create_entry(description, start_time=start_time, duration=duration, tags=tags)
 
     print('>>> Created: ' + description)
 
 
+### MAIN ###
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
@@ -211,8 +227,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # TODO: Reformat this barbarity.
     if args.running:
-        print_running()
+        entry = toggl.running_entry()
+        print_running(entry)
 
     elif args.tag and args.new:
         start_toggl(str(args.new), args.tag)
@@ -228,7 +246,8 @@ if __name__ == '__main__':
 
     # Default behaviour is to show running entries.
     else:
-        print_running()
+        entry = toggl.running_entry()
+        print_running(entry)
     '''
     if args.tag and not args.new:
         print("Incorrect usage.")

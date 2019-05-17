@@ -108,8 +108,33 @@ class Toggl():
         else:
             return run_entry
 
-    def start_entry(self, description, start_time=None,
-                    duration=None, tags=None, wid=None):
+    def create_entry(self, description, start_time=None,
+                     duration=None, tags=None, wid=None):
+        "Creates a new entry."
+        data = {
+            'time_entry': {
+                'description': description,
+                'created_with': self.user_agent
+            }
+        }
+
+        if start_time is not None:
+            data['time_entry']['start'] = start_time
+
+        if duration is not None:
+            data['time_entry']['duration'] = duration
+
+        if tags is not None and type(tags) is list:
+            data['time_entry']['tags'] = tags
+
+        # If no wid is given, a default workspace is used.
+        if wid is None:
+            data['time_entry']['wid'] = self.workspaces()[0]
+
+        requests.post(self.url_entries, json=data,
+                      headers=self.headers)
+
+    def start_entry(self, description, tags=None, wid=None):
         """Starts a new entry."""
 
         """
@@ -123,12 +148,6 @@ class Toggl():
                 'created_with': self.user_agent
             }
         }
-
-        if start_time is not None:
-            data['time_entry']['start'] = start_time
-
-        if duration is not None:
-            data['time_entry']['duration'] = duration
 
         if tags is not None and type(tags) is list:
             data['time_entry']['tags'] = tags
