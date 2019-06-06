@@ -13,6 +13,8 @@ toggl = Toggl()
 # UTC is 0
 timezone = 1
 
+RESUME_NUMBER = 10
+
 
 def read_api_key():
     """Read the user's API key from the config file."""
@@ -54,12 +56,23 @@ def get_time(entry):
     return start_time, run_time_str
 
 
-def is_entry_in_list(entry, a_list):
+def entry_in_list(entry, a_list):
     """Checks if an entry with the same description exists in given list."""
     for item in a_list:
         if entry['description'] == item['description']:
             return True
     return False
+
+
+def entry_epoch_time(entry):
+    """Returns an entry's epoch time."""
+    return time.mktime(time.strptime(entry['start'][:-6],
+                                     '%Y-%m-%dT%H:%M:%S'))
+
+
+def sort_entries(entries_list):
+    """Order a list of entries according to its date."""
+    entries_list.sort(key=entry_epoch_time, reverse=True)
 
 
 def running_description(entry):
@@ -146,25 +159,34 @@ def resume():
     cur_date = str(time_year) + '-' + ('%02d' % time_month) + '-' + ('%02d' % time_day)
     prev_date = str(prev_time_year) + '-' + ('%02d' % prev_time_month) + '-' + ('%02d' % time_day)
 
+    # We retrieve all entries from the last month. We then order them by date
+    # so, when eliminating ones with the same description, we're left with the
+    # most recent instance of each.
     entries = toggl.entries_between(prev_date, cur_date)
+    sort_entries(entries)
     entry_list = []
 
     for entry in entries:
-        if is_entry_in_list(entry, entry_list) is False:
+        if entry_in_list(entry, entry_list) is False:
             entry_list.append(entry)
 
-    # TODO: Print 10 entries in order of last used.
+    # We print a certain number of entries.
+    # That number is defined by RESUME_NUMBER. Default is 10.
+
+    # TODO: Make RESUME_NUMBER depend on an option or configuration.
+    # TODO: Add last run information to each entry.
 
     print(">>> You can resume the following entries:")
-    n = 1
-    for entry in entry_list:
+    for n, entry in enumerate(entry_list, 1):
         tags = []
         if 'tags' in entry:
             [tags.append(i) for i in entry['tags']]
         print('> {} - {} [{}]'.format(str(n),
                                       entry['description'],
                                       ",".join(tags)))
-        n += 1
+        if n == RESUME_NUMBER:
+            break
+
     try:
         choice = int(input(">>> Type an entry number: "))
     except KeyboardInterrupt:
